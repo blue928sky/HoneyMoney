@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html manifest="cache.appcache" lang="ja">
+    
+    <head>
+        <!-- タイトル -->
+        <title>お小遣い帳</title>
+        
+        <!-- meta -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+        <!-- JavaScriptがoffになってる時に自動的に遷移 -->
+        <noscript><meta http-equiv="Refresh" content="0, url=JSoff.html" /></noscript>
+        
+        <!-- External file -->
+        <!-- css -->
+        <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" charset="UTF-8" />
+        <link rel="stylesheet" href="css/css.css" charset="UTF-8" />
+        <!-- javascript -->
+        <script type="text/javascript" src="js/jquery-2.1.3.min.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="js/Chart.min.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="js/js.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js" charset="UTF-8"></script>
+        <!-- favicon -->
+        <link rel="icon" href="icon.png" />
+        <link rel="apple-touch-icon" href="icon.png" />
+    </head>
+    
+    <body>
+        <!-- メイン -->
+        <div data-role="page" id="one">
+            <!-- header -->
+            <div data-role="header">
+                <a href="#Menu" class="ui-btn ui-corner-all ui-icon-bars ui-btn-inline ui-btn-icon-notext ui-btn-left"></a>
+                <h1>お小遣い帳</h1>
+                <a href="#three" class="ui-btn ui-corner-all ui-icon-edit ui-btn-inline ui-btn-icon-notext ui-btn-right"></a>
+            </div><!-- /header -->
+            
+            <!-- アクション -->
+            <div data-role="popup" id="delete" data-overlay-theme="a" data-theme="a" style="min-width:300px; max-width:500px;">
+                <div style="padding:10px 20px;">
+                    <h3>アクション</h3>
+                    <input type="button" value="編集" onClick="edit_storage(0)" />
+                    <input type="button" value="削除" onClick="deletePopup()" />
+                </div>
+            </div><!-- /アクション -->
+            
+            <!-- 削除 -->
+            <div data-role="popup" id="deletePop" data-overlay-theme="a" data-theme="a" style="min-width:300px; max-width:500px;">
+                <div style="padding:10px 20px;">
+                    <h3>削除</h3>
+                    <p>本当に削除しますか？</p>
+                    <input type="button" value="戻る" onClick="history.back()" />
+                    <input type="button" value="削除" onClick="delete_storage()" />
+                </div>
+            </div><!-- /削除 -->
+            
+            <!-- main -->
+            <div data-role="main" class="ui-content" align="center">
+                <div style="max-width:480px;text-align:left;">
+                    <p class="updateM"></p>
+                    <p id="allWallet">全体</p>
+                    <p id="sumP" class="sum_style"><span id="sum">0</span> 円</p>
+                    <p id="walletM" class="wallet"><span id="wallet_sum">0</span> 円</p>
+                    <!-- 検索ボックス -->
+                    <form id="key" class="ui-filterable">
+                        <input id="keywd" data-type="search" placeholder="キーワードを入力して下さい" onFocus="search()" />
+                    </form>
+                    <p id="re" style="text-align:center;"></p><br>
+                    <!-- リスト -->
+                    <ul id="money_list" data-role="listview" data-filter="true" data-input="#keywd"></ul>
+                    <pan id="omission"></span>
+                        </div>
+            </div><!-- /main -->
+            
+            <!-- footer -->
+            <div data-role="footer" id="ft" style='display:none;'>
+                <h4></h4>
+            </div><!-- /footer -->
+            
+            <!-- Menu -->
+            <div data-role="panel" id="Menu" data-display="overlay" data-position-fixed="true">
+                <h2>Menu</h2><br>
+                <ul data-role="listview">
+                    <li data-icon="delete" data-theme="b"><a href="#" data-rel="close">Close menu</a></li>
+                    <li><a href="#one" data-rel="close">ホーム</a></li>
+                    <li><a href="#" onClick="print_graph()">月間</a></li>
+                    <li><a href="#second">設定</a></li>
+                </ul>
+            </div>
+        </div><!-- /メイン -->
+        
+        <!-- 設定 -->
+        <div data-role="page" id="second">
+            <!-- header -->
+            <div data-role="header">
+                <a href="#Menu2" class="ui-btn ui-corner-all ui-icon-bars ui-btn-inline ui-btn-icon-notext ui-btn-left"></a>
+                <h1>お小遣い帳 - 設定</h1>
+                <a href="#three" class="ui-btn ui-corner-all ui-icon-edit ui-btn-inline ui-btn-icon-notext ui-btn-right"></a>
+            </div><!-- /header -->
+            
+            <!-- main -->
+            <div data-role="main" class="ui-content" align="center">
+                <div style="max-width:480px;text-align:left;">
+                    <p class="updateM"></p>
+                    <br>
+                    <table class="ui-responsive table-stroke" width="100%">
+                        <tbody>
+                            <tr>
+                                <th width="30%">目標額</th>
+                                <td id="target" width="69%">タップして設定</td>
+                                <td width="1%">
+                                    <a href="#target_pop" data-rel="popup" data-position-to="window" data-transition="pop" class="ui-btn ui-icon-arrow-r ui-btn-inline ui-btn-icon-notext ui-corner-all tap_config" onClick="conf('target')">タップして設定</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th width="30%">最低額</th>
+                                <td id="worst" width="69%">タップして設定</td>
+                                <td width="1%">
+                                    <a href="#worst_pop" data-rel="popup" data-position-to="window" data-transition="pop" class="ui-btn ui-icon-arrow-r ui-btn-inline ui-btn-icon-notext ui-corner-all tap_config" onClick="conf('worst')">タップして設定</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th width="30%">財布</th>
+                                <td id="wallet" width="69%">0 円</td>
+                                <td width="1%">
+                                    <a href="#wallet_pop" data-rel="popup" data-position-to="window" data-transition="pop" class="ui-btn ui-icon-arrow-r ui-btn-inline ui-btn-icon-notext ui-corner-all tap_config"  onClick="conf('wallet')">タップして設定</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th width="30%">達成率</th>
+                                <td width="70%" id="par" colspan="2">目標額を設定して下さい</td>
+                            </tr>
+                            <tr>
+                                <th width="30%">開始日</th>
+                                <td width="70%" id="first" colspan="2">---</td>
+                            </tr>
+                            <tr>
+                                <th width="30%">累計収入</th>
+                                <td width="70%" colspan="2"><span id="all_in">---</span> 円</td>
+                            </tr>
+                            <tr>
+                                <th width="30%">累計支出</th>
+                                <td width="70%" colspan="2"><span id="all_out">---</span> 円</td>
+                            </tr>
+                            <tr>
+                                <th width="30%">貯蓄率</th>
+                                <td width="70%" colspan="2"><span id="savings">---</span> %</td>
+                            </tr>
+                        </tbody>
+                    </table><br>
+                    <div data-role="collapsible" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-iconpos="right">
+                        <h3>インポート＆エクスポート</h3>
+                        <input type="text" id="inport_data" required />
+                        <a href="#import_data_popup" data-rel="popup" data-transition="pop" data-position-to="window"  class="ui-btn ui-corner-all">インポート(上書き保存)</a>
+                        <a href="#export" data-rel="popup" data-transition="pop" data-position-to="window" class="ui-btn ui-corner-all" onClick="export_data()">エクスポート</a>
+                    </div><!-- /collapsible -->
+                    <br><br>
+                    <a href="#all-delete" data-rel="popup" data-transition="pop" data-position-to="window" class="ui-btn ui-corner-all ui-btn-b">消去</a>
+                </div>
+                
+                <!-- 目標額 -->
+                <div data-role="popup" id="target_pop" data-overlay-theme="a" style="min-width:300px; max-width:500px;">
+                    <div data-role="header" data-theme="a">
+                        <h1>目標額設定</h1>
+                    </div>
+                    <div role="main" class="ui-content">
+                        <p>目標額を設定します</p>
+                        <form onSubmit="config_set('target');return false;">
+                            <input type="number" id="target_money" min="0" />
+                            <input type="submit" value="設定" />
+                        </form>
+                    </div>
+                </div><!-- /目標額 -->
+                
+                <!-- 最低額 -->
+                <div data-role="popup" id="worst_pop" data-overlay-theme="a" style="min-width:300px; max-width:500px;">
+                    <div data-role="header" data-theme="a">
+                        <h1>最低額設定</h1>
+                    </div>
+                    <div role="main" class="ui-content">
+                        <p>最低額を設定します</p>
+                        <form onSubmit="config_set('worst');return false;">
+                            <input type="number" id="worst_money" min="0" />
+                            <input type="submit" value="設定" />
+                        </form>
+                    </div>
+                </div><!-- /最低額 -->
+                
+                <!-- 財布 -->
+                <div data-role="popup" id="wallet_pop" data-overlay-theme="a" style="min-width:300px; max-width:500px;">
+                    <div data-role="header" data-theme="a">
+                        <h1>財布設定</h1>
+                    </div>
+                    <div role="main" class="ui-content">
+                        <p>現在の財布の中身を設定します</p>
+                        <form onSubmit="config_set('wallet');return false;">
+                            <input type="number" id="wallet_money" min="0" />
+                            <input type="submit" value="設定" />
+                        </form>
+                    </div>
+                </div><!-- /財布 -->
+                
+                <!-- 消去ダイアログ -->
+                <div data-role="popup" id="all-delete" data-overlay-theme="b" data-theme="b" style="min-width:300px; max-width:500px;">
+                    <div data-role="header" data-theme="a">
+                        <h1>確認</h1>
+                    </div>
+                    <div role="main" class="ui-content">
+                        <p>入力したもの全部消去します。<br>この操作は取り消せませんが消去しますか？</p>
+                        <div align="center">
+                            <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-btn-inline">戻る</a>
+                            <a href="#" class="ui-btn ui-corner-all ui-btn-inline" onClick="reset_storage();">消去</a>
+                        </div>
+                    </div>
+                </div><!-- /消去ダイアログ -->
+                
+                <!-- インポート -->
+                <div data-role="popup" id="import_data_popup" data-overlay-theme="a" style="min-width:300px; max-width:500px;">
+                    <div data-role="header" data-theme="a">
+                        <h1>確認</h1>
+                    </div>
+                    <div role="main" class="ui-content">
+                        <p>入力したもの上書き保存します。<br>この操作は取り消せませんが保存しますか？</p>
+                        <div align="center">
+                            <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-btn-inline">戻る</a>
+                            <a href="#" class="ui-btn ui-corner-all ui-btn-inline" onClick="import_data()">上書き</a>
+                        </div>
+                    </div>
+                </div><!-- /インポート -->
+                
+                <!-- エクスポート -->
+                <div data-role="popup" id="export" style="min-width:300px; max-height:300px; overflow:auto;">
+                    <div id="export_data" style="padding:20px;">データがありません</div>
+                </div><!-- /エクスポート -->
+            </div><!-- /main -->
+            
+            <!-- footer -->
+            <div data-role="footer">
+                <h4></h4>
+            </div><!-- /footer -->
+            
+            <!-- Menu -->
+            <div data-role="panel" id="Menu2" data-display="overlay" data-position-fixed="true">
+                <h2>Menu</h2><br>
+                <ul data-role="listview">
+                    <li data-icon="delete" data-theme="b"><a href="#" data-rel="close">Close menu</a></li>
+                    <li><a href="#one">ホーム</a></li>
+                    <li><a href="#" onClick="print_graph()">月間</a></li>
+                    <li><a href="#second" data-rel="close">設定</a></li>
+                </ul>
+            </div>
+        </div><!-- /設定 -->
+        
+        <!-- 記帳 -->
+        <div data-role="page" id="three">
+            <!-- header -->
+            <div data-role="header">
+                <a href="#Menu3" class="ui-btn ui-corner-all ui-icon-bars ui-btn-inline ui-btn-icon-notext ui-btn-left"></a>
+                <h1>お小遣い帳 - 記帳</h1>
+                <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-icon-back ui-btn-inline ui-btn-icon-notext ui-btn-right"></a>
+            </div><!-- /header -->
+            
+            <!-- main -->
+            <div data-role="main" class="ui-content" align="center">
+                <div style="max-width:480px;text-align:left;">
+                    <form onSubmit="pls();return false;">
+                        <div role="main" class="ui-content">
+                            <div class="ui-grid-a">
+                                <div class="ui-block-a">
+                                    <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+                                        <label for="radio-choice-a">支出</label>
+                                        <input type="radio" name="radio" id="radio-choice-a" value="expenditure" checked="checked" />
+                                        <label for="radio-choice-b">収入</label>
+                                        <input type="radio" name="radio" id="radio-choice-b" value="revenue" />
+                                    </fieldset>
+                                </div>
+                                <div class="ui-block-b">
+                                    <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+                                        <label for="radio-effect-a">財布</label>
+                                        <input type="radio" name="radio-effect" id="radio-effect-a" value="w" checked="checked" />
+                                        <label for="radio-effect-b">全体</label>
+                                        <input type="radio" name="radio-effect" id="radio-effect-b" value="a" />
+                                    </fieldset>
+                                </div>
+                            </div>
+                            
+                            <div class="ui-field-contain">
+                                <label for="num1">収支:</label>
+                                <input type="number" id="num" required />
+                            </div>
+                            <div class="ui-field-contain">
+                                <label for="num2">説明:</label>
+                                <input type="text" id="text" required />
+                            </div>
+                            
+                            <input data-rel="back" type="submit" value="追加" />
+                        </div>
+                    </form>
+                    
+                    <!-- 説明 -->
+                    <ul>
+                        <li>財布：財布に反映させて記帳する。</li>
+                        <li>全体：財布に反映させないで記帳する。</li>
+                    </ul>
+                </div>
+            </div><!-- /main -->
+            
+            <!-- footer -->
+            <div data-role="footer">
+                <h4></h4>
+            </div><!-- /footer -->
+            
+            <!-- Menu -->
+            <div data-role="panel" id="Menu3" data-display="overlay" data-position-fixed="true">
+                <h2>Menu</h2><br>
+                <ul data-role="listview">
+                    <li data-icon="delete" data-theme="b"><a href="#" data-rel="close">Close menu</a></li>
+                    <li><a href="#one">ホーム</a></li>
+                    <li><a href="#" onClick="print_graph()">月間</a></li>
+                    <li><a href="#second">設定</a></li>
+                </ul>
+            </div>
+        </div><!-- /記帳 -->
+        
+        <!-- 月間 -->
+        <div data-role="page" id="fore">
+            <!-- header -->
+            <div data-role="header">
+                <a href="#Menu4" class="ui-btn ui-corner-all ui-icon-bars ui-btn-inline ui-btn-icon-notext ui-btn-left"></a>
+                <h1>お小遣い帳 - 月間</h1>
+                <a href="#three" class="ui-btn ui-corner-all ui-icon-edit ui-btn-inline ui-btn-icon-notext ui-btn-right"></a>
+            </div><!-- /header -->
+            
+            <!-- main -->
+            <div data-role="main" class="ui-content" align="center">
+                <div style="max-width:480px;text-align:left;">
+                    <p class="updateM"></p>
+                    <br>
+                    <!-- グラフ -->
+                    <div id="canvas_place" align="center"></div>
+                    <div id="canvas_place2" align="center"></div><br>
+                    <!-- テーブル -->
+                    <table data-role="table" data-mode="columntoggle" data-column-btn-text="その他" class="ui-body-d table-stripe ui-responsive" width="100%">
+                        <thead>
+                            <tr class="ui-bar-d">
+                                <th>年月</th>
+                                <th>合計(前月比)</th>
+                                <th data-priority="2">増</th>
+                                <th data-priority="3">減</th>
+                            </tr>
+                        </thead>
+                        <tbody id="month_table" width="100%"></tbody>
+                    </table>
+                </div>
+            </div><!-- /main -->
+            
+            <!-- footer -->
+            <div data-role="footer">
+                <h4></h4>
+            </div><!-- /footer -->
+            
+            <!-- Menu -->
+            <div data-role="panel" id="Menu4" data-display="overlay" data-position-fixed="true">
+                <h2>Menu</h2><br>
+                <ul data-role="listview">
+                    <li data-icon="delete" data-theme="b"><a href="#" data-rel="close">Close menu</a></li>
+                    <li><a href="#one">ホーム</a></li>
+                    <li><a href="#" data-rel="close">月間</a></li>
+                    <li><a href="#second">設定</a></li>
+                </ul>
+            </div>
+        </div><!-- /月間 -->
+        
+        <!-- 編集 -->
+        <div data-role="page" id="five">
+            <!-- header -->
+            <div data-role="header">
+                <a href="#Menu5" class="ui-btn ui-corner-all ui-icon-bars ui-btn-inline ui-btn-icon-notext ui-btn-left"></a>
+                <h1>お小遣い帳 - 編集</h1>
+                <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-icon-back ui-btn-inline ui-btn-icon-notext ui-btn-right"></a>
+            </div><!-- /header -->
+            
+            <!-- main -->
+            <div data-role="main" class="ui-content" align="center">
+                <div style="max-width:480px;text-align:left;">
+                    <form onSubmit="edit_storage(1);return false;">
+                        <div role="main" class="ui-content">
+                            <div class="ui-field-contain">
+                                <label>年月日:</label>
+                                <input type="text" id="data_0" required />
+                            </div>
+                            <div class="ui-field-contain">
+                                <label>時間:</label>
+                                <input type="text" id="data_1" required />
+                            </div>
+                            <div class="ui-field-contain">
+                                <label>収支:</label>
+                                <input type="number" id="data_2" required />
+                            </div>
+                            <div class="ui-field-contain">
+                                <label>説明:</label>
+                                <input type="text" id="data_3" required />
+                            </div>
+                            <input type="submit" value="編集" />
+                            <a href="#one" class="ui-btn ui-corner-all">戻る</a>
+                        </div>
+                    </form>
+                </div>
+            </div><!-- /main -->
+            
+            <!-- footer -->
+            <div data-role="footer">
+                <h4></h4>
+            </div><!-- /footer -->
+            
+            <!-- Menu -->
+            <div data-role="panel" id="Menu5" data-display="overlay" data-position-fixed="true">
+                <h2>Menu</h2><br>
+                <ul data-role="listview">
+                    <li data-icon="delete" data-theme="b"><a href="#" data-rel="close">Close menu</a></li>
+                    <li><a href="#one">ホーム</a></li>
+                    <li><a href="#" onClick="print_graph()">月間</a></li>
+                    <li><a href="#second">設定</a></li>
+                </ul>
+            </div>
+        </div><!-- /編集 -->
+    </body>
+</html>
